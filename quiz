@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Year 4 Measurement Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .quiz-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #334155;
+        }
+        .answer-options button {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            background-color: #e0f2fe;
+            color: #0c4a6e;
+            border: 2px solid #90cdf4;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+        .answer-options button:hover:not(:disabled) {
+            background-color: #bfdbfe;
+            border-color: #60a5fa;
+            transform: translateY(-2px);
+        }
+        .answer-options button:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .answer-options button.correct {
+            background-color: #d1fae5;
+            border-color: #34d399;
+            color: #065f46;
+        }
+        .answer-options button.incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        .feedback {
+            margin-top: 15px;
+            font-size: 1rem;
+            color: #475569;
+            min-height: 30px; /* To prevent layout shift */
+        }
+        .hint-text {
+            font-style: italic;
+            color: #64748b;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        .navigation-buttons {
+            margin-top: 25px;
+        }
+        .navigation-buttons button {
+            padding: 12px 25px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .navigation-buttons button:hover:not(:disabled) {
+            background-color: #2563eb;
+        }
+        .score-display {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #16a34a;
+            margin-top: 20px;
+        }
+        .restart-button {
+            background-color: #f97316 !important;
+            margin-top: 20px;
+        }
+        .restart-button:hover {
+            background-color: #ea580c !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div id="question-area">
+            <p class="question-text" id="question-text"></p>
+            <div class="answer-options" id="answer-options"></div>
+            <p class="feedback" id="feedback-text"></p>
+            <p class="hint-text" id="hint-text"></p>
+            <div class="navigation-buttons">
+                <button id="next-button" class="px-6 py-3 rounded-xl shadow-md">Next Question</button>
+            </div>
+        </div>
+        <div id="quiz-results" class="hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Quiz Completed!</h2>
+            <p class="score-display">Your Score: <span id="final-score">0</span> / <span id="total-questions">10</span></p>
+            <button id="restart-button" class="px-6 py-3 rounded-xl shadow-md restart-button">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = {
+          "questions": [
+            {
+              "question": "A ribbon is 2.5 metres long. How many centimetres long is the ribbon?",
+              "answerOptions": [
+                { "text": "25 cm", "rationale": "This answer might result from misinterpreting the decimal place when converting from metres to centimetres.", "isCorrect": false },
+                { "text": "250 cm", "rationale": "Since there are 100 centimetres in one metre, 2 metres is 200 cm and 0.5 metres (half a metre) is 50 cm, totalling 250 cm.", "isCorrect": true },
+                { "text": "2500 cm", "rationale": "This would be the correct conversion for 25 metres, not 2.5 metres.", "isCorrect": false },
+                { "text": "0.25 cm", "rationale": "This represents a very small length and would be the result of moving the decimal point in the wrong direction.", "isCorrect": false }
+              ],
+              "hint": "Remember how many centimetres are in one metre, and think about what 'point five' (.5) of a metre means."
+            },
+            {
+              "question": "Which of these is the heaviest?",
+              "answerOptions": [
+                { "text": "A 2.5 kg watermelon", "rationale": "Converting this to grams gives 2500 g, which is the largest mass among the options.", "isCorrect": true },
+                { "text": "A 2 kg bag of sugar", "rationale": "This is equivalent to 2000 g, which is less than 2100 g and 2500 g.", "isCorrect": false },
+                { "text": "A box containing 2100 g of cereal", "rationale": "This is equivalent to 2.1 kg, which is more than 2 kg but less than 2.5 kg.", "isCorrect": false },
+                { "text": "A 1950 g block of cheese", "rationale": "This is the lightest option, being just under 2 kg.", "isCorrect": false }
+              ],
+              "hint": "To compare these items, it's easiest to convert all the masses to the same unit, like grams."
+            },
+            {
+              "question": "A recipe needs 150 mL of milk. If you make the recipe 4 times, how much milk do you need in total?",
+              "answerOptions": [
+                { "text": "450 mL", "rationale": "This would be the amount needed if you only made the recipe 3 times.", "isCorrect": false },
+                { "text": "1.5 L", "rationale": "This represents 1500 mL, which is much more than the amount required for four batches.", "isCorrect": false },
+                { "text": "600 mL", "rationale": "The total amount is calculated by multiplying the amount per recipe (150 mL) by the number of times it's made (4).", "isCorrect": true },
+                { "text": "1 L", "rationale": "One litre is 1000 mL. This is more than the total amount of milk needed for the four recipes.", "isCorrect": false }
+              ],
+              "hint": "You need to find the total amount for all four recipes. Think about which mathematical operation to use."
+            },
+            {
+              "question": "A rectangular field is 10 metres long and 5 metres wide. What is its perimeter?",
+              "answerOptions": [
+                { "text": "15 metres", "rationale": "This answer is found by adding only one long side and one short side together, not the entire distance around the field.", "isCorrect": false },
+                { "text": "50 square metres", "rationale": "This is the area of the field (10m x 5m), not the perimeter. Area measures the space inside.", "isCorrect": false },
+                { "text": "25 metres", "rationale": "This answer might come from adding the two given sides and then adding one of them again, instead of adding all four sides.", "isCorrect": false },
+                { "text": "30 metres", "rationale": "Perimeter is the total length of all sides. A rectangle has two long sides and two short sides (10m + 5m + 10m + 5m).", "isCorrect": true }
+              ],
+              "hint": "Perimeter is the total distance around the outside of a shape. Don't forget a rectangle has four sides."
+            },
+            {
+              "question": "A square has an area of 9 square units. What is the length of one of its sides?",
+              "answerOptions": [
+                { "text": "9 units", "rationale": "This is the area itself, not the length of a side. A square with 9-unit sides would have a much larger area.", "isCorrect": false },
+                { "text": "4.5 units", "rationale": "This is half of the area, but the side length of a square isn't found by halving its area.", "isCorrect": false },
+                { "text": "3 units", "rationale": "The area of a square is found by multiplying its side length by itself. 3 multiplied by 3 equals 9.", "isCorrect": true },
+                { "text": "18 units", "rationale": "This would be related to the perimeter of a different shape, not the side length of this square.", "isCorrect": false }
+              ],
+              "hint": "The area of a square is calculated by multiplying side length × side length. What number multiplied by itself equals 9?"
+            },
+            {
+              "question": "True or False: An object with a large volume always has a large mass.",
+              "answerOptions": [
+                { "text": "True", "rationale": "This is a common misconception. Some objects can take up a lot of space (large volume) but be very light (low mass).", "isCorrect": false },
+                { "text": "False", "rationale": "An object's volume (how much space it takes up) and its mass (how heavy it is) are different properties. A large, inflated beach ball has a large volume but a small mass.", "isCorrect": true }
+              ],
+              "hint": "Imagine a large balloon and a small rock. Which one takes up more space? Which one is heavier?"
+            },
+            {
+              "question": "School finishes at 3:10 PM. If you have a 25-minute walk home, what time will you arrive?",
+              "answerOptions": [
+                { "text": "3:30 PM", "rationale": "This time would be reached if the walk was only 20 minutes long.", "isCorrect": false },
+                { "text": "3:35 PM", "rationale": "This is the correct time, found by adding the 25-minute duration to the 10 minutes past the hour (10 + 25 = 35).", "isCorrect": true },
+                { "text": "3:45 PM", "rationale": "This would be the arrival time if the walk was 35 minutes long, not 25 minutes.", "isCorrect": false },
+                { "text": "4:00 PM", "rationale": "This overestimates the travel time significantly. Adding 25 minutes will not take you to the next hour.", "isCorrect": false }
+              ],
+              "hint": "Start with the minutes. Add the duration to the starting minutes and see if it goes past 60."
+            },
+            {
+              "question": "When a clock shows 6:00, what kind of angle do the hands make?",
+              "answerOptions": [
+                { "text": "A right angle (90°)", "rationale": "A right angle is formed at 3:00 or 9:00 when the hands are perpendicular.", "isCorrect": false },
+                { "text": "A full turn (360°)", "rationale": "A full turn means the hand has gone all the way around the clock face.", "isCorrect": false },
+                { "text": "A straight angle (180°)", "rationale": "At 6:00, the hour and minute hands point in opposite directions, forming a straight line, which is a 180-degree angle.", "isCorrect": true },
+                { "text": "An acute angle (less than 90°)", "rationale": "An acute angle is smaller than a right angle, which occurs at times like 1:00 or 2:00.", "isCorrect": false }
+              ],
+              "hint": "Look at the direction both hands are pointing. Do they form a corner, a straight line, or something else?"
+            },
+            {
+              "question": "To completely fill a fish tank with water, what do you need to know about the tank?",
+              "answerOptions": [
+                { "text": "Its perimeter", "rationale": "The perimeter would tell you the distance around the top edge of the tank, but not how much it can hold.", "isCorrect": false },
+                { "text": "Its area", "rationale": "The area would tell you the size of the base of the tank, but not how deep it is.", "isCorrect": false },
+                { "text": "Its capacity or volume", "rationale": "Capacity or volume is the measure of how much a container can hold, which is exactly what's needed to know how much water will fill it.", "isCorrect": true },
+                { "text": "Its mass", "rationale": "The mass would tell you how heavy the empty tank is, not how much water it can contain.", "isCorrect": false }
+              ],
+              "hint": "Are you measuring a length, a flat surface, or the amount of space *inside* the 3D object?"
+            },
+            {
+              "question": "A bottle of juice holds 1 litre. If you pour out 3 glasses of 200 mL each, how much juice is left in the bottle?",
+              "answerOptions": [
+                { "text": "400 mL", "rationale": "First, calculate the total amount poured (3 x 200mL = 600mL). Then, subtract this from the starting amount in millilitres (1000mL - 600mL).", "isCorrect": true },
+                { "text": "600 mL", "rationale": "This is the total amount of juice that was poured out, not the amount remaining in the bottle.", "isCorrect": false },
+                { "text": "700 mL", "rationale": "This might result from a miscalculation, perhaps by only subtracting one or two glasses instead of three.", "isCorrect": false },
+                { "text": "800 mL", "rationale": "This would be the correct answer if only one glass of 200 mL was poured out.", "isCorrect": false }
+              ],
+              "hint": "First, find out the total amount of juice poured out. Then, remember to convert the bottle's capacity to millilitres before you subtract."
+            }
+          ]
+        };
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answeredCorrectly = false; // Flag to prevent multiple clicks on answers
+
+        const questionTextElement = document.getElementById('question-text');
+        const answerOptionsElement = document.getElementById('answer-options');
+        const feedbackTextElement = document.getElementById('feedback-text');
+        const hintTextElement = document.getElementById('hint-text');
+        const nextButton = document.getElementById('next-button');
+        const quizResultsElement = document.getElementById('quiz-results');
+        const questionAreaElement = document.getElementById('question-area');
+        const finalScoreElement = document.getElementById('final-score');
+        const totalQuestionsElement = document.getElementById('total-questions');
+        const restartButton = document.getElementById('restart-button');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= quizData.questions.length) {
+                showResults();
+                return;
+            }
+
+            answeredCorrectly = false;
+            const question = quizData.questions[currentQuestionIndex];
+            questionTextElement.textContent = question.question;
+            answerOptionsElement.innerHTML = '';
+            feedbackTextElement.textContent = '';
+            hintTextElement.textContent = ''; // Clear hint for new question
+            nextButton.style.display = 'none'; // Hide next button initially
+
+            const shuffledOptions = [...question.answerOptions];
+            shuffleArray(shuffledOptions);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option.text;
+                button.classList.add('rounded-xl', 'shadow-sm'); // Tailwind classes for styling
+                button.onclick = () => selectAnswer(button, option.isCorrect, option.rationale);
+                answerOptionsElement.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedButton, isCorrect, rationale) {
+            if (answeredCorrectly) { // Prevent multiple clicks
+                return;
+            }
+            answeredCorrectly = true;
+
+            // Disable all buttons
+            Array.from(answerOptionsElement.children).forEach(button => {
+                button.disabled = true;
+            });
+
+            if (isCorrect) {
+                selectedButton.classList.add('correct');
+                feedbackTextElement.textContent = 'Correct! ' + rationale;
+                score++;
+            } else {
+                selectedButton.classList.add('incorrect');
+                feedbackTextElement.textContent = 'Incorrect. ' + rationale;
+                // Highlight correct answer if incorrect
+                Array.from(answerOptionsElement.children).forEach(button => {
+                    const originalOption = quizData.questions[currentQuestionIndex].answerOptions.find(opt => opt.text === button.textContent);
+                    if (originalOption && originalOption.isCorrect) {
+                        button.classList.add('correct');
+                    }
+                });
+            }
+
+            // Show hint after answer is selected
+            hintTextElement.textContent = 'Hint: ' + quizData.questions[currentQuestionIndex].hint;
+            nextButton.style.display = 'block'; // Show next button
+        }
+
+        function showResults() {
+            questionAreaElement.classList.add('hidden');
+            quizResultsElement.classList.remove('hidden');
+            finalScoreElement.textContent = score;
+            totalQuestionsElement.textContent = quizData.questions.length;
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            quizResultsElement.classList.add('hidden');
+            questionAreaElement.classList.remove('hidden');
+            loadQuestion();
+        }
+
+        nextButton.addEventListener('click', () => {
+            currentQuestionIndex++;
+            loadQuestion();
+        });
+
+        restartButton.addEventListener('click', restartQuiz);
+
+        // Initial load
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>
